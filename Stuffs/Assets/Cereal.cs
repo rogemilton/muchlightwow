@@ -39,22 +39,21 @@ public class Cereal : MonoBehaviour {
 	//adding future functionality
 	public bool working = false;
 
+	void Start()
+	{
+		//immediately open connection to serial port
+		if(!roger.IsOpen)
+		{
+			//if not open, open it!
+			roger.Open();
+			//print out indication that it's open
+		}
+	}
+
+
 	//GUI!
 	void OnGUI()
 	{
-		//GUI button to open up the serial port
-		if(GUI.Button(new Rect(100,100,100,100),"Click here!"))
-		{
-			//make sure that the port isn't open!
-			//program might crash if the port is already open :(
-			if(!roger.IsOpen)
-			{
-				//if not open, open it!
-				roger.Open();
-				//print out indication that it's open
-				Debug.Log("opened connection");
-			}
-		}
 		//all of the other buttons will open up if port is open
 		if(roger.IsOpen)
 		{
@@ -82,24 +81,20 @@ public class Cereal : MonoBehaviour {
 			*/
 			if(GUI.Button(new Rect(100,200,50,50),"Red!"))
 			{
-				int num = 20;
-				byte[] b = BitConverter.GetBytes(num);
+				byte[] b = BitConverter.GetBytes(20);
 				roger.Write(b,0,4);
 				Debug.Log ("wrote 20 to COM4 (hopefully or else the LED wouldn't light up!)");
 			}
 			if(GUI.Button(new Rect(150,200,50,50),"Yellow!"))
 			{
-				int num = 40;
-				byte[] b = BitConverter.GetBytes(num);
+				byte[] b = BitConverter.GetBytes(40);
 				roger.Write(b,0,4);
 				Debug.Log ("wrote 40 to COM4 (hopefully or else the LED wouldn't light up!)");
 			}
-			//GUI button to close serial port
-			if(GUI.Button(new Rect(100,250,100,25),"Close >:D"))
+			//GUI button to restart level
+			if(GUI.Button(new Rect(100,250,100,25),"Reset >:D"))
 			{
-				//close serial port
-				roger.Close();
-				Debug.Log("closed!");
+				Application.LoadLevel(0);
 			}
 		}
 
