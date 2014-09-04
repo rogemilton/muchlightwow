@@ -23,6 +23,8 @@
 
 using UnityEngine;
 using System.Collections;
+//for the List
+using System.Collections.Generic;
 //import for connecting to the serial port -- but first before importing IO.Ports,
 //go to file->build settings->player settings and select .NET 2.0, not the other one
 using System.IO.Ports;
@@ -39,8 +41,21 @@ public class Cereal : MonoBehaviour {
 	//adding future functionality
 	public bool working = false;
 
+	//hand gameobject
+	public GameObject hand;
+
+	public bool handToggle = false;
+
+	//keep track of previous and current hand positions
+	List <float> handPos = new List<float>();
+
+	//initialized diff between new-old hand positions
+	float diff = 0.0f;
+
 	void Start()
 	{
+		handPos.Add (hand.transform.position.y);
+
 		//immediately open connection to serial port
 		if(!roger.IsOpen)
 		{
@@ -48,8 +63,15 @@ public class Cereal : MonoBehaviour {
 			roger.Open();
 			//print out indication that it's open
 		}
+
+		//moves [0] = hand.transform.position.y;
 	}
 
+	void Update()
+	{
+		FixList ();
+
+	}
 
 	//GUI!
 	void OnGUI()
@@ -57,7 +79,7 @@ public class Cereal : MonoBehaviour {
 		//all of the other buttons will open up if port is open
 		if(roger.IsOpen)
 		{
-			Debug.Log ("connection is open now!");
+			//Debug.Log ("connection is open now!");
 
 			/*Okay,so I want the Arduino to take in integer values
 				 * but OH NOES, I only know how to write string values
@@ -81,14 +103,11 @@ public class Cereal : MonoBehaviour {
 			*/
 			if(GUI.Button(new Rect(100,200,50,50),"Red!"))
 			{
-				byte[] b = BitConverter.GetBytes(20);
-				roger.Write(b,0,4);
-				Debug.Log ("wrote 20 to COM4 (hopefully or else the LED wouldn't light up!)");
+				roger.Write(BitConverter.GetBytes(20),0,4);
 			}
 			if(GUI.Button(new Rect(150,200,50,50),"Yellow!"))
 			{
-				byte[] b = BitConverter.GetBytes(40);
-				roger.Write(b,0,4);
+				roger.Write(BitConverter.GetBytes(40),0,4);
 				Debug.Log ("wrote 40 to COM4 (hopefully or else the LED wouldn't light up!)");
 			}
 			//GUI button to restart level
@@ -99,4 +118,54 @@ public class Cereal : MonoBehaviour {
 		}
 
 	}
+
+	void FixList()
+	{
+		if (GameObject.Find ("rightHand")) 
+		{
+			hand = GameObject.Find("rightHand");
+			Debug.Log("Found r hand!");
+		}
+
+		/*
+		if (GameObject.Find ("leftHand")) 
+		{
+			hand = GameObject.Find("leftHand");
+			Debug.Log("Found l hand!");
+
+		}
+		*/
+
+
+		handPos.Add(hand.transform.position.y);
+
+		if(handPos.Count == 3)
+		{
+			handPos.RemoveAt (0);
+		}
+
+		//Debug.Log (" ct = " + handPos.Count);
+
+		//Debug.Log ("hand pos 0 = " + handPos [0]);
+
+		//Debug.Log ("pos 0 " + handPos[0]);
+		//Debug.Log ("pos 1 " + handPos [1]);
+				
+		diff = (handPos[1] - handPos[0]);
+		int angle = (int) ( (diff * (90.0f / 0.7f) ) + 90f);
+
+		Debug.Log ("diff = " + diff + " angle = " + angle);
+		if(diff > 0)
+		{
+			Debug.Log ("1");
+			roger.Write(BitConverter.GetBytes(angle),0,4);
+		}
+		if(diff < 0)
+		{
+			Debug.Log("0 ");
+			roger.Write(BitConverter.GetBytes(135),0,4);
+		}
+
+	}
+
 }

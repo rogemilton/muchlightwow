@@ -36,7 +36,7 @@ void loop()
           {
              digitalWrite(red,HIGH); 
              digitalWrite(yellow,LOW);
-             //Stuff();
+             Stuff(2);
           }
           else
           {
@@ -59,20 +59,28 @@ void loop()
           {
             digitalWrite(red,HIGH);
             digitalWrite(yellow,HIGH);
-              //Stuff(2); 
+              Stuff(2); 
           }
     }
 }
 
 //this function will have the servo rotate n degrees
-void Stuff(int n)
+int Stuff(int n)
 {
-  //begin loop for servo - I'll test it when I get home!!!
-   int i=0;
-   for(i=0;i<n;++i)
-   {
-     //rotate servo on degree increments
-      rotator.write(i); 
-   }
+
+   if(cereal != 30)
+     {
+       return 0;
+     }
+    if(cereal == 30)
+    {
+     rotator.write(n);
+     Stuff(n+1); 
+    }
+    if(cereal == 50)
+    {
+     rotator.write(n); 
+     Stuff(n-1);
+    }
 }
 
